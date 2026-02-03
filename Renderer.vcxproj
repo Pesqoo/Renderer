@@ -149,6 +149,7 @@
     <ClInclude Include="App\Camera.h" />
     <ClInclude Include="Engine\D3D9RenderDevice.h" />
     <ClInclude Include="App\MainWindow.h" />
+    <ClInclude Include="Engine\IRenderDevice.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -156,6 +157,7 @@
     <ClCompile Include="App\Application.cpp" />
     <ClCompile Include="App\Camera.cpp" />
     <ClCompile Include="Engine\D3D9RenderDevice.cpp" />
+    <ClCompile Include="Engine\IRenderDevice.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="App\MainWindow.cpp" />
   </ItemGroup>

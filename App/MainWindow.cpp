@@ -51,10 +51,19 @@ bool MainWindow::Create(
     ShowWindow(m_hWnd, SW_SHOW);
     UpdateWindow(m_hWnd);
 
-    if (!m_renderDevice.Initialize(m_hWnd, width, height))
+    m_renderDevice = std::make_unique<D3D9RenderDevice>();
+
+    RenderInitParams params{};
+    params.hWnd = m_hWnd;
+    params.width = width;
+    params.height = height;
+    params.vsync = true;
+
+    if (!m_renderDevice->Initialize(params))
         return false;
 
-    m_renderDevice.SetCamera(&m_camera);
+    if (!GenerateCube())
+        return false;
 
     return true;
 }
@@ -66,7 +75,14 @@ void MainWindow::Process(float dt)
 
 void MainWindow::Render()
 {
-    m_renderDevice.Render();
+    m_renderDevice->BeginFrame();
+    m_renderDevice->SetCamera(&m_camera);
+    m_renderDevice->DrawIndexed(
+        m_cubeVB,
+        m_cubeIB,
+        sizeof(CUSTOMVERTEX),
+        m_cubeIndexCount);
+    m_renderDevice->EndFrame();
 }
 
 LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -144,4 +160,46 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
         default:
             return DefWindowProcW(m_hWnd, msg, wParam, lParam);
     }
+}
+
+bool MainWindow::GenerateCube()
+{
+    CUSTOMVERTEX vertices[] =
+    {
+        // front face
+        { -1.0f, -1.0f, -1.0f, D3DCOLOR_XRGB(0,   0,   255) },
+        { -1.0f,  1.0f, -1.0f, D3DCOLOR_XRGB(0,   255, 0) },
+        {  1.0f,  1.0f, -1.0f, D3DCOLOR_XRGB(255, 0,   0) },
+        {  1.0f, -1.0f, -1.0f, D3DCOLOR_XRGB(255, 0,   0) },
+
+        // back face
+        {  1.0f,  1.0f,  1.0f, D3DCOLOR_XRGB(0,   0,   255) },
+        {  1.0f, -1.0f,  1.0f, D3DCOLOR_XRGB(0,   255, 0) },
+        { -1.0f, -1.0f,  1.0f, D3DCOLOR_XRGB(0,   0,   255) },
+        { -1.0f,  1.0f,  1.0f, D3DCOLOR_XRGB(0,   255, 0) },
+    };
+
+    WORD indices[] =
+    {
+        0, 1, 2, 0, 2, 3, // front
+        0, 6, 7, 7, 1, 0, // left
+        3, 2, 4, 4, 5, 3, // right
+        0, 3, 5, 5, 6, 0, // bottom
+        1, 7, 4, 4, 2, 1, // top
+        5, 4, 7, 7, 6, 5, // back
+    };
+
+    m_cubeVB = m_renderDevice->CreateVertexBuffer(
+        vertices,
+        sizeof(CUSTOMVERTEX),
+        static_cast<std::uint32_t>(std::size(vertices)));
+
+    m_cubeIB = m_renderDevice->CreateIndexBuffer(
+        indices,
+        static_cast<std::uint32_t>(std::size(indices)),
+        false);
+
+    m_cubeIndexCount = static_cast<std::uint32_t>(std::size(indices));
+
+    return m_cubeVB != 0 && m_cubeIB != 0;
 }

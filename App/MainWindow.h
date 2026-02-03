@@ -1,6 +1,7 @@
 #pragma once
-#include <windows.h>
+#include "Windows.h"
 #include "D3D9RenderDevice.h"
+#include "Camera.h"
 
 constexpr int MAX_LOADSTRING = 100;
 
@@ -19,9 +20,16 @@ public:
     void Render();
 
     HWND GetHwnd() const { return m_hWnd; }
+
 private:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     LRESULT HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+
+    // TODO: move to own mesh
+    bool GenerateCube();
+    VertexBufferHandle m_cubeVB = 0;
+    IndexBufferHandle m_cubeIB = 0;
+    std::uint32_t m_cubeIndexCount = 0;
 
     HWND m_hWnd = nullptr;
     HINSTANCE m_hInstance = nullptr;
@@ -33,7 +41,7 @@ private:
     int m_height = 0;
 
     Camera m_camera;
-    D3D9RenderDevice m_renderDevice;
+    std::unique_ptr<IRenderDevice> m_renderDevice;
 
     bool m_isOrbiting = false;
     int  m_lastMouseX = 0;
