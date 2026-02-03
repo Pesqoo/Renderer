@@ -43,6 +43,11 @@ private:
 
     using clock = std::chrono::high_resolution_clock;
     clock::time_point m_startTime;
+    clock::time_point m_lastFrameTime;
 
     float m_cameraDistance = 8.0f;
+    float m_targetDistance = 8.0f;
+
+    float m_yaw = 0.0f;  // horizontal angle (radians)
+    float m_pitch = 0.0f;  // vertical angle (radians)
 };

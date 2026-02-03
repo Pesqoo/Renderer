@@ -4,6 +4,7 @@
 D3D9RenderDevice::D3D9RenderDevice()
 {
     m_startTime = clock::now();
+    m_lastFrameTime = m_startTime;
 }
 
 D3D9RenderDevice::~D3D9RenderDevice()
@@ -139,7 +140,15 @@ void D3D9RenderDevice::SetupTransforms()
 
     auto now = clock::now();
     std::chrono::duration<float> elapsed = now - m_startTime;
+    std::chrono::duration<float> frameDelta = now - m_lastFrameTime;
+    m_lastFrameTime = now;
+
     float t = elapsed.count();
+    float dt = frameDelta.count();
+
+    const float damping = 10.0f;
+    float alpha = 1.0f - std::exp(-damping * dt);
+    m_cameraDistance += (m_targetDistance - m_cameraDistance) * alpha;
 
     // world
     D3DXMATRIX rotX, rotY, world;
@@ -195,7 +204,11 @@ void D3D9RenderDevice::RenderFrame()
 
 void D3D9RenderDevice::Zoom(float steps)
 {
-    const float zoomSpeed = 1.0f;
-    m_cameraDistance -= steps * zoomSpeed;
-    m_cameraDistance = std::clamp(m_cameraDistance, 3.0f, 50.0f);
+    const float zoomSpeed = 2.0f;
+
+    m_targetDistance -= steps * zoomSpeed;
+    m_targetDistance = std::clamp(m_targetDistance, 3.0f, 50.0f);
+
+    //m_cameraDistance -= steps * zoomSpeed;
+    //m_cameraDistance = std::clamp(m_cameraDistance, 3.0f, 50.0f);
 }
