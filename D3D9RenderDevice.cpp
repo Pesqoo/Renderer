@@ -152,14 +152,22 @@ void D3D9RenderDevice::SetupTransforms()
 
     // world
     D3DXMATRIX rotX, rotY, world;
-    D3DXMatrixRotationX(&rotX, t * 0.7f);
+    D3DXMatrixRotationX(&rotX, 1.1f);
     D3DXMatrixRotationY(&rotY, 1.1f);
     world = rotX * rotY;
     m_D3D9Device->SetTransform(D3DTS_WORLD, &world);
 
     // view
+    float cosPitch = std::cos(m_pitch);
+    float sinPitch = std::sin(m_pitch);
+    float cosYaw = std::cos(m_yaw);
+    float sinYaw = std::sin(m_yaw);
+
     D3DXMATRIX view;
-    D3DXVECTOR3 eye(0.0f, 0.0f, -m_cameraDistance);
+    D3DXVECTOR3 eye(
+        m_cameraDistance * sinYaw * cosPitch,
+        m_cameraDistance * sinPitch,
+        -m_cameraDistance * cosYaw * cosPitch);
     D3DXVECTOR3 at(0.0f, 0.0f, 0.0f);
     D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
     D3DXMatrixLookAtLH(&view, &eye, &at, &up);
@@ -208,7 +216,15 @@ void D3D9RenderDevice::Zoom(float steps)
 
     m_targetDistance -= steps * zoomSpeed;
     m_targetDistance = std::clamp(m_targetDistance, 3.0f, 50.0f);
+}
 
-    //m_cameraDistance -= steps * zoomSpeed;
-    //m_cameraDistance = std::clamp(m_cameraDistance, 3.0f, 50.0f);
+void D3D9RenderDevice::AddOrbitDelta(float dx, float dy)
+{
+    const float orbitSpeed = 0.01f;
+    m_yaw += dx * orbitSpeed;
+    m_pitch += dy * orbitSpeed;
+
+    const float limit = D3DXToRadian(89.0f);
+    if (m_pitch > limit) m_pitch = limit;
+    if (m_pitch < -limit) m_pitch = -limit;
 }

@@ -24,7 +24,9 @@ public:
     bool Initialize(HWND hWnd, int width, int height);
 
     void RenderFrame();
+
     void Zoom(float steps);
+    void AddOrbitDelta(float dx, float dy);
 
 private:
     void InitDevice(HWND hWnd, int width, int height);

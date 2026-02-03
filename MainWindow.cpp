@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "Resource.h"
+#include "windowsx.h"
 
 bool MainWindow::Create(
     HINSTANCE hInstance,
@@ -100,6 +101,37 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
             int delta = GET_WHEEL_DELTA_WPARAM(wParam);
             float steps = static_cast<float>(delta) / WHEEL_DELTA;
             m_renderDevice.Zoom(steps);
+            return 0;
+        }
+        case WM_RBUTTONDOWN:
+        {
+            m_isOrbiting = true;
+            m_lastMouseX = GET_X_LPARAM(lParam);
+            m_lastMouseY = GET_Y_LPARAM(lParam);
+            SetCapture(m_hWnd);
+            return 0;
+        }
+        case WM_RBUTTONUP:
+        {
+            m_isOrbiting = false;
+            ReleaseCapture();
+            return 0;
+        }
+        case WM_MOUSEMOVE:
+        {
+            if (m_isOrbiting && (wParam & MK_RBUTTON))
+            {
+                int x = GET_X_LPARAM(lParam);
+                int y = GET_Y_LPARAM(lParam);
+
+                float dx = static_cast<float>(x - m_lastMouseX);
+                float dy = static_cast<float>(y - m_lastMouseY);
+
+                m_renderDevice.AddOrbitDelta(dx, dy);
+
+                m_lastMouseX = x;
+                m_lastMouseY = y;
+            }
             return 0;
         }
         default:

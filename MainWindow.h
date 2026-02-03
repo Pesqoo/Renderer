@@ -32,4 +32,8 @@ private:
     int m_height = 0;
 
     D3D9RenderDevice m_renderDevice;
+
+    bool m_isOrbiting = false;
+    int  m_lastMouseX = 0;
+    int  m_lastMouseY = 0;
 };
