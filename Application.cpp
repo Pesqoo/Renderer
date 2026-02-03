@@ -8,6 +8,9 @@ int Application::Run()
     if (!m_mainWindow.Create(m_hInstance, SCREEN_WIDTH, SCREEN_HEIGHT))
         return -1;
 
+    using clock = std::chrono::high_resolution_clock;
+    auto lastFrameTime = clock::now();
+
     MSG msg{};
     while (true)
     {
@@ -20,6 +23,12 @@ int Application::Run()
             DispatchMessageW(&msg);
         }
 
-        m_mainWindow.RenderFrame();
+        const auto now = clock::now();
+        const auto frameDelta = now - lastFrameTime;
+        const float dt = std::chrono::duration<float>(frameDelta).count();
+        lastFrameTime = now;
+        
+        m_mainWindow.Process(dt);
+        m_mainWindow.Render();
     }
 }

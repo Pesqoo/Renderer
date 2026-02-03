@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Camera.h"
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <chrono>
@@ -18,15 +18,13 @@ struct CUSTOMVERTEX
 class D3D9RenderDevice
 {
 public:
-    D3D9RenderDevice();
+    D3D9RenderDevice() = default;
     ~D3D9RenderDevice();
 
     bool Initialize(HWND hWnd, int width, int height);
+    void SetCamera(const Camera* camera) { m_camera = camera; }
 
-    void RenderFrame();
-
-    void Zoom(float steps);
-    void AddOrbitDelta(float dx, float dy);
+    void Render();
 
 private:
     void InitDevice(HWND hWnd, int width, int height);
@@ -43,13 +41,5 @@ private:
     int m_width = 0;
     int m_height = 0;
 
-    using clock = std::chrono::high_resolution_clock;
-    clock::time_point m_startTime;
-    clock::time_point m_lastFrameTime;
-
-    float m_cameraDistance = 8.0f;
-    float m_targetDistance = 8.0f;
-
-    float m_yaw = 0.0f;  // horizontal angle (radians)
-    float m_pitch = 0.0f;  // vertical angle (radians)
+    const Camera* m_camera = nullptr;
 };

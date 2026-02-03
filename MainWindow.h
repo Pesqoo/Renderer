@@ -15,7 +15,8 @@ public:
         int width,
         int height);
 
-    void RenderFrame();
+    void Process(float dt);
+    void Render();
 
     HWND GetHwnd() const { return m_hWnd; }
 private:
@@ -25,12 +26,13 @@ private:
     HWND m_hWnd = nullptr;
     HINSTANCE m_hInstance = nullptr;
 
-    WCHAR m_szTitle[MAX_LOADSTRING];
-    WCHAR m_szWindowClass[MAX_LOADSTRING];
+    WCHAR m_szTitle[MAX_LOADSTRING] = {};
+    WCHAR m_szWindowClass[MAX_LOADSTRING] = {};
 
     int m_width = 0;
     int m_height = 0;
 
+    Camera m_camera;
     D3D9RenderDevice m_renderDevice;
 
     bool m_isOrbiting = false;

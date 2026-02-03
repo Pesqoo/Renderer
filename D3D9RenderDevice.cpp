@@ -1,12 +1,6 @@
 ﻿#include "D3D9RenderDevice.h"
 #include <algorithm>
 
-D3D9RenderDevice::D3D9RenderDevice()
-{
-    m_startTime = clock::now();
-    m_lastFrameTime = m_startTime;
-}
-
 D3D9RenderDevice::~D3D9RenderDevice()
 {
     if (m_vertexBuffer)
@@ -136,46 +130,26 @@ void D3D9RenderDevice::InitGraphics()
 
 void D3D9RenderDevice::SetupTransforms()
 {
-    using clock = std::chrono::high_resolution_clock;
-
-    auto now = clock::now();
-    std::chrono::duration<float> elapsed = now - m_startTime;
-    std::chrono::duration<float> frameDelta = now - m_lastFrameTime;
-    m_lastFrameTime = now;
-
-    float t = elapsed.count();
-    float dt = frameDelta.count();
-
-    const float damping = 10.0f;
-    float alpha = 1.0f - std::exp(-damping * dt);
-    m_cameraDistance += (m_targetDistance - m_cameraDistance) * alpha;
-
     // world
-    D3DXMATRIX rotX, rotY, world;
-    D3DXMatrixRotationX(&rotX, 1.1f);
-    D3DXMatrixRotationY(&rotY, 1.1f);
-    world = rotX * rotY;
+    D3DXMATRIX world;
+    D3DXMatrixIdentity(&world);
     m_D3D9Device->SetTransform(D3DTS_WORLD, &world);
 
     // view
-    float cosPitch = std::cos(m_pitch);
-    float sinPitch = std::sin(m_pitch);
-    float cosYaw = std::cos(m_yaw);
-    float sinYaw = std::sin(m_yaw);
+    Vec3 _eye = m_camera->GetEye();
+    Vec3 _at = m_camera->GetTarget();
+    Vec3 _up = m_camera->GetUp();
+
+    D3DXVECTOR3 eye(_eye.x, _eye.y, _eye.z);
+    D3DXVECTOR3 at(_at.x, _at.y, _at.z);
+    D3DXVECTOR3 up(_up.x, _up.y, _up.z);
 
     D3DXMATRIX view;
-    D3DXVECTOR3 eye(
-        m_cameraDistance * sinYaw * cosPitch,
-        m_cameraDistance * sinPitch,
-        -m_cameraDistance * cosYaw * cosPitch);
-    D3DXVECTOR3 at(0.0f, 0.0f, 0.0f);
-    D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
     D3DXMatrixLookAtLH(&view, &eye, &at, &up);
     m_D3D9Device->SetTransform(D3DTS_VIEW, &view);
 
     // projection
     float aspect = static_cast<float>(m_width) / static_cast<float>(m_height);
-
     D3DXMATRIX proj;
     D3DXMatrixPerspectiveFovLH(
         &proj,
@@ -183,48 +157,40 @@ void D3D9RenderDevice::SetupTransforms()
         aspect,
         0.1f,
         100.0f);
-
     m_D3D9Device->SetTransform(D3DTS_PROJECTION, &proj);
 }
 
-void D3D9RenderDevice::RenderFrame()
+void D3D9RenderDevice::Render()
 {
-    if (!m_D3D9Device)
+    if (!m_D3D9Device || !m_camera)
         return;
 
-    m_D3D9Device->Clear(0, nullptr, D3DCLEAR_TARGET,
-        D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0);
+    m_D3D9Device->Clear(
+        0, 
+        nullptr, 
+        D3DCLEAR_TARGET,
+        D3DCOLOR_XRGB(0, 40, 100), 
+        1.0f, 
+        0);
 
     if (SUCCEEDED(m_D3D9Device->BeginScene()))
     {
-        m_D3D9Device->SetFVF(CUSTOMFVF);
         SetupTransforms();
 
+        m_D3D9Device->SetFVF(CUSTOMFVF);
         m_D3D9Device->SetStreamSource(0, m_vertexBuffer, 0, sizeof(CUSTOMVERTEX));
         m_D3D9Device->SetIndices(m_indexBuffer);
-        m_D3D9Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12);
+
+        m_D3D9Device->DrawIndexedPrimitive(
+            D3DPT_TRIANGLELIST, 
+            0, 
+            0, 
+            8, 
+            0, 
+            12);
 
         m_D3D9Device->EndScene();
     }
 
     m_D3D9Device->Present(nullptr, nullptr, nullptr, nullptr);
-}
-
-void D3D9RenderDevice::Zoom(float steps)
-{
-    const float zoomSpeed = 2.0f;
-
-    m_targetDistance -= steps * zoomSpeed;
-    m_targetDistance = std::clamp(m_targetDistance, 3.0f, 50.0f);
-}
-
-void D3D9RenderDevice::AddOrbitDelta(float dx, float dy)
-{
-    const float orbitSpeed = 0.01f;
-    m_yaw += dx * orbitSpeed;
-    m_pitch += dy * orbitSpeed;
-
-    const float limit = D3DXToRadian(89.0f);
-    if (m_pitch > limit) m_pitch = limit;
-    if (m_pitch < -limit) m_pitch = -limit;
 }

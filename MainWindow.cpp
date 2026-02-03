@@ -54,12 +54,19 @@ bool MainWindow::Create(
     if (!m_renderDevice.Initialize(m_hWnd, width, height))
         return false;
 
+    m_renderDevice.SetCamera(&m_camera);
+
     return true;
 }
 
-void MainWindow::RenderFrame()
+void MainWindow::Process(float dt)
 {
-    m_renderDevice.RenderFrame();
+    m_camera.Process(dt);
+}
+
+void MainWindow::Render()
+{
+    m_renderDevice.Render();
 }
 
 LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -100,7 +107,7 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
         {
             int delta = GET_WHEEL_DELTA_WPARAM(wParam);
             float steps = static_cast<float>(delta) / WHEEL_DELTA;
-            m_renderDevice.Zoom(steps);
+            m_camera.Zoom(steps);
             return 0;
         }
         case WM_RBUTTONDOWN:
@@ -127,7 +134,7 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
                 float dx = static_cast<float>(x - m_lastMouseX);
                 float dy = static_cast<float>(y - m_lastMouseY);
 
-                m_renderDevice.AddOrbitDelta(dx, dy);
+                m_camera.Orbit(dx, dy);
 
                 m_lastMouseX = x;
                 m_lastMouseY = y;
