@@ -157,7 +157,6 @@
     <ClCompile Include="App\Application.cpp" />
     <ClCompile Include="App\Camera.cpp" />
     <ClCompile Include="Engine\D3D9RenderDevice.cpp" />
-    <ClCompile Include="Engine\IRenderDevice.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="App\MainWindow.cpp" />
   </ItemGroup>
