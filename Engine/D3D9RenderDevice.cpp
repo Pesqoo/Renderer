@@ -53,12 +53,6 @@ void D3D9RenderDevice::Shutdown()
         m_D3D9Device->Release();
         m_D3D9Device = nullptr;
     }
-
-    if (m_D3D9Device)
-    {
-        m_D3D9Device->Release();
-        m_D3D9Device = nullptr;
-    }
 }
 
 void D3D9RenderDevice::BeginFrame()
