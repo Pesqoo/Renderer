@@ -1,7 +1,8 @@
 #pragma once
 #include "Windows.h"
-#include "D3D9RenderDevice.h"
+#include "IRenderDevice.h"
 #include "Camera.h"
+#include <memory>
 
 constexpr int MAX_LOADSTRING = 100;
 
@@ -27,8 +28,8 @@ private:
 
     // TODO: move to own mesh
     bool GenerateCube();
-    VertexBufferHandle m_cubeVB = 0;
-    IndexBufferHandle m_cubeIB = 0;
+    VertexBufferPtr m_cubeVB = 0;
+    IndexBufferPtr m_cubeIB = 0;
     std::uint32_t m_cubeIndexCount = 0;
 
     HWND m_hWnd = nullptr;

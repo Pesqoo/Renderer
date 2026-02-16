@@ -1,10 +1,5 @@
 #pragma once
-#include <numbers>
-
-struct Vec3
-{
-    float x, y, z;
-};
+#include "Maths.h"
 
 class Camera
 {
@@ -25,6 +20,10 @@ public:
     Vec3 GetEye() const;
     Vec3 GetUp() const;
 
+    Mat4 GetViewLH() const;
+    Mat4 GetProjLH(float aspect) const;
+    Mat4 GetViewProjLH(float aspect) const { return Mul(GetViewLH(), GetProjLH(aspect)); }
+
 private:
     Vec3 m_target;
 
@@ -33,4 +32,8 @@ private:
 
     float m_distance = 10.0f;
     float m_targetDistance = 10.0f;
+
+    float m_fovYDeg = 60.0f;
+    float m_nearZ = 0.1f;
+    float m_farZ = 100.0f;
 };

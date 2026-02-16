@@ -1,6 +1,7 @@
 ﻿#include "Camera.h"
 #include <algorithm>
 #include <cmath> 
+#include <numbers>
 
 namespace
 {
@@ -64,4 +65,14 @@ Vec3 Camera::GetEye() const
 Vec3 Camera::GetUp() const
 {
     return { 0.0f, 1.0f, 0.0f };
+}
+
+Mat4 Camera::GetViewLH() const
+{
+    return LookAtLH(GetEye(), m_target, GetUp());
+}
+
+Mat4 Camera::GetProjLH(float aspect) const
+{
+    return PerspectiveFovLH(DegToRad(m_fovYDeg), aspect, m_nearZ, m_farZ);
 }

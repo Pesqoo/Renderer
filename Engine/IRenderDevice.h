@@ -1,4 +1,5 @@
 #pragma once
+#include "GPUBuffers.h"
 #include "Windows.h"
 #include <cstdint>
 
@@ -12,16 +13,12 @@ struct RenderInitParams
     bool  vsync = true;
 };
 
-using VertexBufferHandle = uint32_t;
-using IndexBufferHandle = uint32_t;
-
 class IRenderDevice
 {
 public:
     virtual ~IRenderDevice() = default;
 
     virtual bool Initialize(const RenderInitParams& params) = 0;
-    virtual void Shutdown() = 0;
 
     virtual void BeginFrame() = 0;
     virtual void EndFrame() = 0;
@@ -29,21 +26,17 @@ public:
     virtual void SetCamera(const Camera* camera) = 0;
 
     virtual void DrawIndexed(
-        VertexBufferHandle vb,
-        IndexBufferHandle  ib,
-        uint32_t vertexStride,
+        const VertexBufferPtr& vbBase,
+        const IndexBufferPtr& ibBase,
         uint32_t indexCount) = 0;
 
-    virtual VertexBufferHandle CreateVertexBuffer(
+    virtual VertexBufferPtr CreateVertexBuffer(
+        VertexFormat format,
         const void* data,
-        uint32_t vertexStride,
         uint32_t vertexCount) = 0;
 
-    virtual IndexBufferHandle CreateIndexBuffer(
+    virtual IndexBufferPtr CreateIndexBuffer(
         const void* data,
         uint32_t indexCount,
         bool use32Bit) = 0;
-
-    virtual void DestroyVertexBuffer(VertexBufferHandle handle) = 0;
-    virtual void DestroyIndexBuffer(IndexBufferHandle handle) = 0;
 };

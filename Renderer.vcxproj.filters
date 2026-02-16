@@ -7,14 +7,14 @@
     <Filter Include="App">
       <UniqueIdentifier>{81fa86fb-5c4a-4534-978f-bda51cdc3c53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\D3D9">
+      <UniqueIdentifier>{3d81d21e-7fa4-4a28-8479-3c0b10c88407}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\D3D11">
+      <UniqueIdentifier>{f95caf9a-cccc-4ec3-a184-371d7db137f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\D3D9RenderDevice.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="App\Camera.h">
-      <Filter>App</Filter>
-    </ClInclude>
     <ClInclude Include="App\MainWindow.h">
       <Filter>App</Filter>
     </ClInclude>
@@ -23,21 +23,57 @@
     </ClInclude>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Engine\IRenderDevice.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\D3D9\D3D9RenderDevice.h">
+      <Filter>Engine\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\D3D11\D3D11RenderDevice.h">
+      <Filter>Engine\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\D3D9\D3D9Buffers.h">
+      <Filter>Engine\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\D3D9\D3D9Util.h">
+      <Filter>Engine\D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\D3D11\D3D11Buffers.h">
+      <Filter>Engine\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\D3D11\D3D11Util.h">
+      <Filter>Engine\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GPUBuffers.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Maths.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\VertexFormat.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Camera.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\D3D9RenderDevice.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="App\Application.cpp">
-      <Filter>App</Filter>
-    </ClCompile>
-    <ClCompile Include="App\Camera.cpp">
       <Filter>App</Filter>
     </ClCompile>
     <ClCompile Include="App\MainWindow.cpp">
       <Filter>App</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Engine\D3D9\D3D9RenderDevice.cpp">
+      <Filter>Engine\D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\D3D11\D3D11RenderDevice.cpp">
+      <Filter>Engine\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Camera.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Renderer.ico" />
