@@ -13,6 +13,9 @@
     <Filter Include="Engine\D3D11">
       <UniqueIdentifier>{f95caf9a-cccc-4ec3-a184-371d7db137f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\D3D11\NewFilter1">
+      <UniqueIdentifier>{95716626-76d6-41f1-9304-521d4012bb69}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\MainWindow.h">
@@ -81,5 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Renderer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Engine\D3D11\Shaders\SimplePS.hlsl" />
+    <FxCompile Include="Engine\D3D11\Shaders\SimpleVS.hlsl" />
   </ItemGroup>
 </Project>

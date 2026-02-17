@@ -83,60 +83,27 @@ bool D3D11RenderDevice::CreateBackbufferRTV()
 
 bool D3D11RenderDevice::CreatePipeline_PC()
 {
-    const char* vsSrc = R"(
-cbuffer VSConstants : register(b0)
-{
-    float4x4 gWorldViewProj;
-};
+    auto vsBlob = LoadCSO(L"SimpleVS.cso");
+    auto psBlob = LoadCSO(L"SimplePS.cso");
 
-struct VSIn
-{
-    float3 pos   : POSITION;
-    float4 color : COLOR0;
-};
-
-struct VSOut
-{
-    float4 pos   : SV_POSITION;
-    float4 color : COLOR0;
-};
-
-VSOut VSMain(VSIn i)
-{
-    VSOut o;
-    o.pos = mul(float4(i.pos, 1.0f), gWorldViewProj);
-    o.color = i.color;
-    return o;
-}
-)";
-
-    const char* psSrc = R"(
-struct PSIn
-{
-    float4 pos   : SV_POSITION;
-    float4 color : COLOR0;
-};
-
-float4 PSMain(PSIn i) : SV_TARGET
-{
-    return i.color;
-}
-)";
-
-    auto vsBC = CompileHLSL(vsSrc, "VSMain", "vs_4_0");
-    auto psBC = CompileHLSL(psSrc, "PSMain", "ps_4_0");
-    if (!vsBC || !psBC)
+    if (!vsBlob || !psBlob)
         return false;
 
     HRESULT hr = m_device->CreateVertexShader(
-        vsBC->GetBufferPointer(), vsBC->GetBufferSize(),
-        nullptr, m_vsPC.GetAddressOf());
-    if (FAILED(hr)) return false;
+        vsBlob->GetBufferPointer(), 
+        vsBlob->GetBufferSize(),
+        nullptr, 
+        m_vsPC.GetAddressOf());
+    if (FAILED(hr))
+        return false;
 
     hr = m_device->CreatePixelShader(
-        psBC->GetBufferPointer(), psBC->GetBufferSize(),
-        nullptr, m_psPC.GetAddressOf());
-    if (FAILED(hr)) return false;
+        psBlob->GetBufferPointer(), 
+        psBlob->GetBufferSize(),
+        nullptr, 
+        m_psPC.GetAddressOf());
+    if (FAILED(hr))
+        return false;
 
     D3D11_INPUT_ELEMENT_DESC il[] =
     {
@@ -145,10 +112,13 @@ float4 PSMain(PSIn i) : SV_TARGET
     };
 
     hr = m_device->CreateInputLayout(
-        il, (UINT)std::size(il),
-        vsBC->GetBufferPointer(), vsBC->GetBufferSize(),
+        il, 
+        (UINT)std::size(il),
+        vsBlob->GetBufferPointer(), 
+        vsBlob->GetBufferSize(),
         m_ilPC.GetAddressOf());
-    if (FAILED(hr)) return false;
+    if (FAILED(hr)) 
+        return false;
 
     D3D11_BUFFER_DESC cbd{};
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;

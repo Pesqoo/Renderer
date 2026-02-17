@@ -3,13 +3,14 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <cstring>
+#include <iostream>
 
 struct alignas(16) VSConstants
 {
     float worldViewProj[16];
 };
 
-inline static Microsoft::WRL::ComPtr<ID3DBlob> CompileHLSL(
+inline Microsoft::WRL::ComPtr<ID3DBlob> CompileHLSL(
     const char* source,
     const char* entry,
     const char* target)
@@ -39,4 +40,14 @@ inline static Microsoft::WRL::ComPtr<ID3DBlob> CompileHLSL(
         return {};
 
     return bytecode;
+}
+
+inline Microsoft::WRL::ComPtr<ID3DBlob> LoadCSO(const wchar_t* path)
+{
+    Microsoft::WRL::ComPtr<ID3DBlob> blob;
+    HRESULT hr = D3DReadFileToBlob(path, blob.GetAddressOf());
+    if (FAILED(hr))
+        return {};
+
+    return blob;
 }

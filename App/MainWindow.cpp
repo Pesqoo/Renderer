@@ -2,8 +2,8 @@
 #include "Resource.h"
 #include "windowsx.h"
 
-#include "Engine/D3D9/D3D9RenderDevice.h"
-// #include "Engine/D3D11/D3D11RenderDevice.h"
+// #include "Engine/D3D9/D3D9RenderDevice.h"
+#include "Engine/D3D11/D3D11RenderDevice.h"
 
 bool MainWindow::Create(
     HINSTANCE hInstance,
@@ -54,7 +54,7 @@ bool MainWindow::Create(
     ShowWindow(m_hWnd, SW_SHOW);
     UpdateWindow(m_hWnd);
 
-    m_renderDevice = std::make_unique<D3D9RenderDevice>();
+    m_renderDevice = std::make_unique<D3D11RenderDevice>();
 
     RenderInitParams params{};
     params.hWnd = m_hWnd;
