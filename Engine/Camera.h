@@ -9,6 +9,7 @@ public:
     void Process(float dt);
 
     void Orbit(float deltaYaw, float deltaPitch);
+    void Pan(float deltaX, float deltaY);
     void Zoom(float steps);
 
     void SetTarget(const Vec3& target) { m_target = target; }

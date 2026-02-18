@@ -146,6 +146,20 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
             ReleaseCapture();
             return 0;
         }
+        case WM_LBUTTONDOWN:
+        {
+            m_isPanning = true;
+			m_lastMouseX = GET_X_LPARAM(lParam);
+			m_lastMouseY = GET_Y_LPARAM(lParam);
+			SetCapture(m_hWnd);
+			return 0;
+        }
+		case WM_LBUTTONUP:
+		{
+			m_isPanning = false;
+            ReleaseCapture();
+            return 0;
+        }
         case WM_MOUSEMOVE:
         {
             if (m_isOrbiting && (wParam & MK_RBUTTON))
@@ -160,7 +174,18 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 
                 m_lastMouseX = x;
                 m_lastMouseY = y;
-            }
+			}
+			else if (m_isPanning && (wParam & MK_LBUTTON))
+			{
+				int x = GET_X_LPARAM(lParam);
+				int y = GET_Y_LPARAM(lParam);
+				float dx = static_cast<float>(x - m_lastMouseX);
+				float dy = static_cast<float>(y - m_lastMouseY);
+				m_camera.Pan(dx, dy);
+				m_lastMouseX = x;
+				m_lastMouseY = y;
+			}
+
             return 0;
         }
         default:

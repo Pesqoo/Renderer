@@ -35,6 +35,19 @@ void Camera::Orbit(float deltaYaw, float deltaPitch)
     if (m_pitch < -PITCH_LIMIT) m_pitch = -PITCH_LIMIT;
 }
 
+void Camera::Pan(float deltaX, float deltaY)
+{
+	float cosPitch = std::cos(m_pitch);
+	float sinPitch = std::sin(m_pitch);
+	float cosYaw = std::cos(m_yaw);
+	float sinYaw = std::sin(m_yaw);
+
+	Vec3 right { cosYaw, 0.0f, sinYaw };
+	Vec3 up { -sinYaw * sinPitch, cosPitch, cosYaw * sinPitch };
+
+	m_target = m_target + right * (-deltaX * ORBIT_SENSITIVITY) + up * (deltaY * ORBIT_SENSITIVITY);
+}
+
 void Camera::Zoom(float steps)
 {
     m_targetDistance -= steps * ZOOM_SPEED;

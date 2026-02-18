@@ -45,6 +45,7 @@ private:
     std::unique_ptr<IRenderDevice> m_renderDevice;
 
     bool m_isOrbiting = false;
-    int  m_lastMouseX = 0;
-    int  m_lastMouseY = 0;
+    bool m_isPanning = false;
+    int m_lastMouseX = 0;
+    int m_lastMouseY = 0;
 };
