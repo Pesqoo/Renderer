@@ -4,6 +4,7 @@
 #include <cstdint>
 
 class Camera;
+struct Mat4;
 
 struct RenderInitParams
 {
@@ -24,6 +25,7 @@ public:
     virtual void EndFrame() = 0;
 
     virtual void SetCamera(const Camera* camera) = 0;
+    virtual void SetWorld(const Mat4& world) = 0;
 
     virtual void DrawIndexed(
         const VertexBufferPtr& vbBase,

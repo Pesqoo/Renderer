@@ -2,7 +2,7 @@
 #include "Resource.h"
 #include "windowsx.h"
 
-// #include "Engine/D3D9/D3D9RenderDevice.h"
+#include "Engine/D3D9/D3D9RenderDevice.h"
 #include "Engine/D3D11/D3D11RenderDevice.h"
 
 bool MainWindow::Create(
@@ -80,10 +80,15 @@ void MainWindow::Render()
 {
     m_renderDevice->BeginFrame();
     m_renderDevice->SetCamera(&m_camera);
-    m_renderDevice->DrawIndexed(
-        m_cubeVB,
-        m_cubeIB,
-        m_cubeIndexCount);
+
+    Mat4 worldA = Mat4::Identity();
+    m_renderDevice->SetWorld(worldA);
+    m_renderDevice->DrawIndexed(m_cubeVB, m_cubeIB, m_cubeIndexCount);
+
+    Mat4 worldB = Mat4::Translation(0.0f, 0.0f, 3.0f);
+    m_renderDevice->SetWorld(worldB);
+    m_renderDevice->DrawIndexed(m_cubeVB, m_cubeIB, m_cubeIndexCount);
+
     m_renderDevice->EndFrame();
 }
 

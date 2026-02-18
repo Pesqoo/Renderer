@@ -21,6 +21,7 @@ public:
     void EndFrame() override;
 
     void SetCamera(const Camera* camera) override;
+    void SetWorld(const Mat4& world) override;
 
     void DrawIndexed(
         const VertexBufferPtr& vbBase,
@@ -38,8 +39,8 @@ public:
         bool use32Bit) override;
 
 private:
-    Microsoft::WRL::ComPtr<IDirect3D9> m_D3D9;
-    Microsoft::WRL::ComPtr<IDirect3DDevice9> m_D3D9Device;
+    Microsoft::WRL::ComPtr<IDirect3D9> m_d3d9;
+    Microsoft::WRL::ComPtr<IDirect3DDevice9> m_device;
 
     int m_width = 0;
     int m_height = 0;

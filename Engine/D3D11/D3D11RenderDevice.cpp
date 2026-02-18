@@ -6,6 +6,8 @@
 #include "Camera.h"
 
 
+using Microsoft::WRL::ComPtr;
+
 bool D3D11RenderDevice::Initialize(const RenderInitParams& params)
 {
     m_width = params.width;
@@ -43,30 +45,25 @@ bool D3D11RenderDevice::Initialize(const RenderInitParams& params)
         m_swapChain.GetAddressOf(),
         m_device.GetAddressOf(),
         &flOut,
-        m_ctx.GetAddressOf());
+        m_context.GetAddressOf());
 
-    if (FAILED(hr) || !m_device || !m_ctx || !m_swapChain)
+    if (FAILED(hr) || !m_device || !m_context || !m_swapChain)
         return false;
 
-    if (!CreateBackbufferRTV())
+    if (!createBackbufferRTV())
         return false;
 
-    if (!CreatePipeline_PC())
+    if (!createPipeline_PC())
         return false;
 
-    D3D11_VIEWPORT vp{};
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-    vp.Width = (float)m_width;
-    vp.Height = (float)m_height;
-    vp.MinDepth = 0.0f;
-    vp.MaxDepth = 1.0f;
-    m_ctx->RSSetViewports(1, &vp);
+    createDepthBuffer((UINT)params.width, (UINT)params.height);
+    createDepthStencilState();
+    setViewport();
 
     return true;
 }
 
-bool D3D11RenderDevice::CreateBackbufferRTV()
+bool D3D11RenderDevice::createBackbufferRTV()
 {
     Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
     HRESULT hr = m_swapChain->GetBuffer(
@@ -81,7 +78,7 @@ bool D3D11RenderDevice::CreateBackbufferRTV()
     return SUCCEEDED(hr) && m_rtv;
 }
 
-bool D3D11RenderDevice::CreatePipeline_PC()
+bool D3D11RenderDevice::createPipeline_PC()
 {
     auto vsBlob = LoadCSO(L"SimpleVS.cso");
     auto psBlob = LoadCSO(L"SimplePS.cso");
@@ -129,21 +126,71 @@ bool D3D11RenderDevice::CreatePipeline_PC()
     return SUCCEEDED(hr) && m_vsConstants;
 }
 
+void D3D11RenderDevice::createDepthBuffer(UINT width, UINT height)
+{
+    D3D11_TEXTURE2D_DESC depthDesc{};
+    depthDesc.Width = width;
+    depthDesc.Height = height;
+    depthDesc.MipLevels = 1;
+    depthDesc.ArraySize = 1;
+    depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthDesc.SampleDesc.Count = 1;
+    depthDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+    ComPtr<ID3D11Texture2D> depthTexture;
+    m_device->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+
+    m_device->CreateDepthStencilView(
+        depthTexture.Get(),
+        nullptr,
+        m_dsv.GetAddressOf());
+}
+
+void D3D11RenderDevice::createDepthStencilState()
+{
+    D3D11_DEPTH_STENCIL_DESC dsDesc{};
+    dsDesc.DepthEnable = TRUE;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+    dsDesc.StencilEnable = FALSE;
+
+    m_device->CreateDepthStencilState(
+        &dsDesc,
+        m_depthState.GetAddressOf());
+    m_context->OMSetDepthStencilState(m_depthState.Get(), 0);
+}
+
+void D3D11RenderDevice::setViewport()
+{
+    D3D11_VIEWPORT vp{};
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    vp.Width = (float)m_width;
+    vp.Height = (float)m_height;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+
+    m_context->RSSetViewports(1, &vp);
+}
+
 void D3D11RenderDevice::BeginFrame()
 {
-    if (!m_ctx || !m_rtv)
+    if (!m_context || !m_rtv)
         return;
 
     const float clear[4] = { 0.0f, 40.0f / 255.0f, 100.0f / 255.0f, 1.0f };
-    m_ctx->OMSetRenderTargets(1, m_rtv.GetAddressOf(), nullptr);
-    m_ctx->ClearRenderTargetView(m_rtv.Get(), clear);
+    m_context->OMSetRenderTargets(1, m_rtv.GetAddressOf(), m_dsv.Get());
+    m_context->ClearRenderTargetView(m_rtv.Get(), clear);
+    m_context->ClearDepthStencilView(m_dsv.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-    m_ctx->IASetInputLayout(m_ilPC.Get());
-    m_ctx->VSSetShader(m_vsPC.Get(), nullptr, 0);
-    m_ctx->PSSetShader(m_psPC.Get(), nullptr, 0);
+    m_context->IASetInputLayout(m_ilPC.Get());
+    m_context->VSSetShader(m_vsPC.Get(), nullptr, 0);
+    m_context->PSSetShader(m_psPC.Get(), nullptr, 0);
 
-    m_ctx->VSSetConstantBuffers(0, 1, m_vsConstants.GetAddressOf());
-    m_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_context->VSSetConstantBuffers(0, 1, m_vsConstants.GetAddressOf());
+    m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void D3D11RenderDevice::EndFrame()
@@ -157,21 +204,31 @@ void D3D11RenderDevice::EndFrame()
 void D3D11RenderDevice::SetCamera(const Camera* camera)
 {
     m_camera = camera;
-    if (!m_ctx || !m_camera || !m_vsConstants)
+    if (!m_context || !m_camera || !m_vsConstants)
         return;
 
     const float aspect = (m_height != 0) ? (float)m_width / (float)m_height : 1.0f;
 
     Mat4 world = Mat4::Identity();
-    Mat4 view = m_camera->GetViewLH();
-    Mat4 proj = m_camera->GetProjLH(aspect);
+    m_view = m_camera->GetViewLH();
+    m_proj = m_camera->GetProjLH(aspect);
 
-    Mat4 wv = Mul(world, view);
-    Mat4 wvp = Mul(wv, proj);
+    Mat4 wv = Mul(world, m_view);
+    Mat4 wvp = Mul(wv, m_proj);
 
     VSConstants cb{};
     Mat4::Transpose(wvp, cb.worldViewProj); // HLSL default column-major
-    m_ctx->UpdateSubresource(m_vsConstants.Get(), 0, nullptr, &cb, 0, 0);
+    m_context->UpdateSubresource(m_vsConstants.Get(), 0, nullptr, &cb, 0, 0);
+}
+
+void D3D11RenderDevice::SetWorld(const Mat4& world)
+{
+    Mat4 wv = Mul(world, m_view);
+    Mat4 wvp = Mul(wv, m_proj);
+
+    VSConstants cb{};
+    Mat4::Transpose(wvp, cb.worldViewProj);
+    m_context->UpdateSubresource(m_vsConstants.Get(), 0, nullptr, &cb, 0, 0);
 }
 
 void D3D11RenderDevice::DrawIndexed(
@@ -179,7 +236,7 @@ void D3D11RenderDevice::DrawIndexed(
     const IndexBufferPtr& ibBase,
     uint32_t indexCount)
 {
-    if (!m_ctx || !vbBase || !ibBase || indexCount == 0)
+    if (!m_context || !vbBase || !ibBase || indexCount == 0)
         return;
 
     auto* vb = static_cast<D3D11VertexBuffer*>(vbBase.get());
@@ -190,12 +247,12 @@ void D3D11RenderDevice::DrawIndexed(
     UINT stride = vbBase->GetStride();
     UINT offset = 0;
     ID3D11Buffer* vbs[] = { vb->buffer.Get() };
-    m_ctx->IASetVertexBuffers(0, 1, vbs, &stride, &offset);
+    m_context->IASetVertexBuffers(0, 1, vbs, &stride, &offset);
 
     DXGI_FORMAT idxFmt = DXGI_FORMAT_R16_UINT; // ibBase->Is32Bit() ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
-    m_ctx->IASetIndexBuffer(ib->buffer.Get(), idxFmt, 0);
+    m_context->IASetIndexBuffer(ib->buffer.Get(), idxFmt, 0);
 
-    m_ctx->DrawIndexed(indexCount, 0, 0);
+    m_context->DrawIndexed(indexCount, 0, 0);
 }
 
 VertexBufferPtr D3D11RenderDevice::CreateVertexBuffer(

@@ -49,6 +49,15 @@ struct Mat4
         out[8]  = in.m[2];  out[9]  = in.m[6];  out[10] = in.m[10]; out[11] = in.m[14];
         out[12] = in.m[3];  out[13] = in.m[7];  out[14] = in.m[11]; out[15] = in.m[15];
     }
+
+	static Mat4 Translation(float x, float y, float z)
+	{
+		Mat4 r = Identity();
+		r.m[12] = x;
+		r.m[13] = y;
+		r.m[14] = z;
+		return r;
+	}
 };
 
 inline Mat4 Mul(const Mat4& a, const Mat4& b)
