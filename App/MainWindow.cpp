@@ -20,7 +20,7 @@ bool MainWindow::Create(
     WNDCLASSEXW wcex{};
     wcex.cbSize = sizeof(WNDCLASSEXW);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = MainWindow::WndProc;
+    wcex.lpfnWndProc = MainWindow::wndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInstance;
@@ -54,7 +54,7 @@ bool MainWindow::Create(
     ShowWindow(m_hWnd, SW_SHOW);
     UpdateWindow(m_hWnd);
 
-    m_renderDevice = std::make_unique<D3D11RenderDevice>();
+    m_renderDevice = std::make_unique<D3D9RenderDevice>();
 
     RenderInitParams params{};
     params.hWnd = m_hWnd;
@@ -65,7 +65,7 @@ bool MainWindow::Create(
     if (!m_renderDevice->Initialize(params))
         return false;
 
-    if (!GenerateCube())
+    if (!generateCube())
         return false;
 
     return true;
@@ -92,7 +92,7 @@ void MainWindow::Render()
     m_renderDevice->EndFrame();
 }
 
-LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     MainWindow* pThis = nullptr;
 
@@ -111,12 +111,12 @@ LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
     }
 
     if (pThis)
-        return pThis->HandleMessage(msg, wParam, lParam);
+        return pThis->handleMessage(msg, wParam, lParam);
 
     return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT MainWindow::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
@@ -193,7 +193,7 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
     }
 }
 
-bool MainWindow::GenerateCube()
+bool MainWindow::generateCube()
 {
     VertexPC vertices[] =
     {

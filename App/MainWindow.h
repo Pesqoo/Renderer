@@ -23,11 +23,11 @@ public:
     HWND GetHwnd() const { return m_hWnd; }
 
 private:
-    static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    LRESULT HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    LRESULT handleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
 
     // TODO: move to own mesh
-    bool GenerateCube();
+    bool generateCube();
     VertexBufferPtr m_cubeVB = 0;
     IndexBufferPtr m_cubeIB = 0;
     std::uint32_t m_cubeIndexCount = 0;
