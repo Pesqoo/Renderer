@@ -15,7 +15,7 @@ bool D3D11RenderDevice::Initialize(const RenderInitParams& params)
     m_vsync = params.vsync;
 
     DXGI_SWAP_CHAIN_DESC scd{};
-    scd.BufferCount = 1;
+    scd.BufferCount = 2;
     scd.BufferDesc.Width = params.width;
     scd.BufferDesc.Height = params.height;
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -23,7 +23,8 @@ bool D3D11RenderDevice::Initialize(const RenderInitParams& params)
     scd.OutputWindow = params.hWnd;
     scd.SampleDesc.Count = 1;
     scd.Windowed = TRUE;
-    scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    scd.Flags = 0;
 
     UINT deviceFlags = 0;
 #if defined(_DEBUG)

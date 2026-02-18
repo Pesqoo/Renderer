@@ -54,7 +54,7 @@ bool MainWindow::Create(
     ShowWindow(m_hWnd, SW_SHOW);
     UpdateWindow(m_hWnd);
 
-    m_renderDevice = std::make_unique<D3D9RenderDevice>();
+    m_renderDevice = std::make_unique<D3D11RenderDevice>();
 
     RenderInitParams params{};
     params.hWnd = m_hWnd;
